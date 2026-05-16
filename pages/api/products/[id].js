@@ -1,10 +1,10 @@
-// GET    /api/products/:id — 단일 상품
-// PUT    /api/products/:id — 수정
-// DELETE /api/products/:id — 삭제 (soft delete)
-import { supabaseAdmin } from '../../../lib/supabase'
+// 📄 pages/api/products/[id].js
+import { createClient } from '@supabase/supabase-js'
 
 export default async function handler(req, res) {
-  const db = supabaseAdmin()
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const db  = createClient(url, key)
   const { id } = req.query
 
   if (req.method === 'GET') {
