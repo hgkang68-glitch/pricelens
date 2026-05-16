@@ -34,7 +34,8 @@ async function searchNaver(query) {
     };
   });
 
-  const lowestTotal = items.length ? Math.min(...items.map(i => i.total)) : null;
+  items.sort((a, b) => a.total - b.total);
+  const lowestTotal = items.length ? items[0].total : null;
   return { platform: "naver", items, lowestTotal };
 }
 
@@ -73,7 +74,8 @@ async function searchCoupang(query) {
     };
   });
 
-  const lowestTotal = items.length ? Math.min(...items.map(i => i.total)) : null;
+  items.sort((a, b) => a.total - b.total);
+  const lowestTotal = items.length ? items[0].total : null;
   return { platform: "coupang", items, lowestTotal };
 }
 
@@ -113,7 +115,8 @@ async function searchEleventh(query) {
     if (items.length >= 5) break;
   }
 
-  const lowestTotal = items.length ? Math.min(...items.map(i => i.total)) : null;
+  items.sort((a, b) => a.total - b.total);
+  const lowestTotal = items.length ? items[0].total : null;
   return { platform: "eleventh", items, lowestTotal };
 }
 
@@ -148,7 +151,8 @@ async function searchGmarket(query) {
     };
   }).filter(i => i.price > 0);
 
-  const lowestTotal = items.length ? Math.min(...items.map(i => i.total)) : null;
+  items.sort((a, b) => a.total - b.total);
+  const lowestTotal = items.length ? items[0].total : null;
   return { platform: "gmarket", items, lowestTotal };
 }
 
