@@ -1,6 +1,7 @@
 // 📄 pages/index.js  — 4단계: 카테고리 → 상품선택 → 검색결과선택 → 가격비교
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Nav from "../components/Nav";
 
 const COSTCO_PRODUCTS = {
   "🥗 식품": [
@@ -52,12 +53,45 @@ const PLATFORM_INFO = {
 
 export default function Home() {
   const [cat,         setCat]         = useState(CATS[0]);
-  const [costcoProd,  setCostcoProd]  = useState(null);  // Step2: 코스트코 상품
-  const [searchData,  setSearchData]  = useState(null);  // Step3: 검색결과
+  const [costcoProd,  setCostcoProd]  = useState(null);
+  const [searchData,  setSearchData]  = useState(null);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [selItem,     setSelItem]     = useState(null);  // Step4: 선택한 개별 상품
-  const [compareData, setCompareData] = useState(null);  // Step4: 비교 결과
+  const [selItem,     setSelItem]     = useState(null);
+  const [compareData, setCompareData] = useState(null);
   const [cmpLoading,  setCmpLoading]  = useState(false);
+  const [saveStatus,  setSaveStatus]  = useState(null); // null | 'saving' | 'done' | 'err'
+  const [dbProducts,  setDbProducts]  = useState([]);
+
+  // DB 상품 목록 로드 (Supabase 연동 시 사용)
+  useEffect(() => {
+    fetch('/api/products').then(r => r.json()).then(d => { if (Array.isArray(d)) setDbProducts(d) }).catch(() => {})
+  }, []);
+
+  async function handleSave() {
+    if (!selItem || !compareData) return;
+    setSaveStatus('saving');
+    try {
+      const dbProd = dbProducts.find(p => p.name === costcoProd?.name);
+      const r = await fetch('/api/snapshots/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id:   dbProd?.id || null,
+          product_name: costcoProd?.name || selItem.title,
+          category:     costcoProd?.cat || null,
+          costco_price: costcoProd?.costco || null,
+          naver:        compareData.naver,
+          coupang:      compareData.coupang,
+          eleventh:     compareData.eleventh,
+          gmarket:      compareData.gmarket,
+          winner:       compareData.winner,
+        }),
+      });
+      if (!r.ok) throw new Error();
+      setSaveStatus('done');
+      setTimeout(() => setSaveStatus(null), 3000);
+    } catch { setSaveStatus('err'); setTimeout(() => setSaveStatus(null), 3000); }
+  }
 
   // Step2 → Step3: 코스트코 상품 클릭 → 검색
   async function handleCostcoClick(product) {
@@ -106,10 +140,7 @@ export default function Home() {
   return (
     <div style={S.page}>
       {/* ── 헤더 ── */}
-      <div style={S.topbar}>
-        <span style={S.logo}>🏷️ PriceLens</span>
-        <span style={S.logoSub}>코스트코 × 온라인 가격 비교 (배송비 포함)</span>
-      </div>
+      <Nav active="compare" />
 
       {/* ── 카테고리 탭 ── */}
       <div style={S.catBar}>
@@ -349,6 +380,22 @@ export default function Home() {
               </div>
 
               <div style={S.note}>* 배송비는 판매자 조건·수량에 따라 달라질 수 있습니다</div>
+
+              {/* 💾 저장 버튼 */}
+              <div style={{ padding: '12px 16px', borderTop: '1px solid #1E1E26', display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={handleSave}
+                  disabled={saveStatus === 'saving'}
+                  style={{
+                    background: saveStatus === 'done' ? '#1A2A10' : saveStatus === 'err' ? '#2A0D0D' : '#C8F250',
+                    color: saveStatus === 'done' ? '#C8F250' : saveStatus === 'err' ? '#E24B4A' : '#0D0D0F',
+                    border: 'none', borderRadius: 8, padding: '9px 20px', fontSize: 13, fontWeight: 600,
+                    cursor: 'pointer', fontFamily: 'inherit', transition: 'all .2s',
+                  }}
+                >
+                  {saveStatus === 'saving' ? '저장 중...' : saveStatus === 'done' ? '✓ 저장됨' : saveStatus === 'err' ? '저장 실패' : '💾 비교결과 저장'}
+                </button>
+              </div>
             </div>
           )}
         </div>
