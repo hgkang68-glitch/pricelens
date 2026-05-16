@@ -1,10 +1,13 @@
-// GET /api/snapshots/list?category=식품&from=2025-01-01&limit=100
-import { supabaseAdmin } from '../../../lib/supabase'
+// 📄 pages/api/snapshots/list.js
+import { createClient } from '@supabase/supabase-js'
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' })
 
-  const db = supabaseAdmin()
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const db  = createClient(url, key)
+
   const { category, from, to, limit = 200 } = req.query
 
   let q = db.from('price_snapshots').select('*').order('collected_at', { ascending: false }).limit(Number(limit))

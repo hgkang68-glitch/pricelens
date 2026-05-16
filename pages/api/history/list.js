@@ -1,14 +1,16 @@
 // 📄 pages/api/history/list.js
-// GET /api/history/list?product_id=xxx&days=30
-import { supabaseAdmin } from '../../../lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' })
+  if (req.method !== 'GET') return res.status(400).json({ error: 'Method not allowed' })
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const db  = createClient(url, key)
 
   const { product_id, days = 30 } = req.query
   if (!product_id) return res.status(400).json({ error: 'product_id 필요' })
 
-  const db = supabaseAdmin()
   const from = new Date()
   from.setDate(from.getDate() - Number(days))
 

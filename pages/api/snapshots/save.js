@@ -1,19 +1,20 @@
-// POST /api/snapshots/save — 가격 비교 결과 저장
-import { supabaseAdmin } from '../../../lib/supabase'
+// 📄 pages/api/snapshots/save.js
+import { createClient } from '@supabase/supabase-js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const db = supabaseAdmin()
-  const { product_id, product_name, category, costco_price, naver, coupang, eleventh, gmarket, winner } = req.body
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const db  = createClient(url, key)
 
+  const { product_id, product_name, category, costco_price, naver, coupang, eleventh, gmarket, winner } = req.body
   if (!product_name) return res.status(400).json({ error: 'product_name 필요' })
 
-  const getLowest = (platform) => platform?.items?.[0] || null
-  const n = getLowest(naver)
-  const c = getLowest(coupang)
-  const e = getLowest(eleventh)
-  const g = getLowest(gmarket)
+  const n = naver?.items?.[0]   || null
+  const c = coupang?.items?.[0] || null
+  const e = eleventh?.items?.[0]|| null
+  const g = gmarket?.items?.[0] || null
 
   const row = {
     product_id:      product_id || null,
