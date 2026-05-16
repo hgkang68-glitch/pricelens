@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import Nav from '../components/Nav'
-import { supabase } from '../lib/supabase'
 
 const PLATFORMS = [
   { id: 'naver',    label: '네이버', color: '#03C75A' },
@@ -39,20 +38,14 @@ export default function History() {
 
   async function loadHistory() {
     setLoading(true)
-    const from = new Date()
-    from.setDate(from.getDate() - range)
-
-    const { data, error } = await supabase
-      .from('price_history')
-      .select('*')
-      .eq('product_id', selId)
-      .gte('collected_at', from.toISOString())
-      .order('collected_at')
-
-    if (!error && data) {
-      setHistory(data)
-      buildChartData(data)
-    }
+    try {
+      const r = await fetch(`/api/history/list?product_id=${selId}&days=${range}`)
+      const data = await r.json()
+      if (Array.isArray(data)) {
+        setHistory(data)
+        buildChartData(data)
+      }
+    } catch (e) { console.error(e) }
     setLoading(false)
   }
 
