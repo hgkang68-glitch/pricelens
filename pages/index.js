@@ -1,13 +1,13 @@
-// 📄 pages/index.js — 흰색 테마 + 객단가 표시
+// ?�� pages/index.js ???�색 ?�마 + 객단가 ?�시
 
 import { useState, useEffect } from "react";
 import Nav from "../components/Nav";
 
 const PLATFORM_INFO = {
-  naver:    { label: "🔍 네이버 쇼핑", color: "#059669" },
-  coupang:  { label: "🛒 쿠팡",        color: "#DC2626" },
-  eleventh: { label: "1️⃣ 11번가",     color: "#EA580C" },
-  gmarket:  { label: "🏪 G마켓",       color: "#2563EB" },
+  naver:    { label: "?�� ?�이�??�핑", color: "#059669" },
+  coupang:  { label: "?�� 쿠팡",        color: "#DC2626" },
+  eleventh: { label: "1️⃣ 11번�?",     color: "#EA580C" },
+  gmarket:  { label: "?�� G마켓",       color: "#2563EB" },
 };
 
 export default function Home() {
@@ -74,7 +74,7 @@ export default function Home() {
     <div style={S.page}>
       <Nav active="compare" />
 
-      {/* 카테고리 탭 */}
+      {/* 카테고리 ??*/}
       <div style={S.catBar}>
         {cats.map(c => (
           <button key={c} style={{ ...S.catTab, ...(cat === c ? S.catTabOn : {}) }} onClick={() => selectCat(c)}>
@@ -83,25 +83,25 @@ export default function Home() {
         ))}
       </div>
 
-      {/* 단계 표시 */}
+      {/* ?�계 ?�시 */}
       <div style={S.steps}>
-        {["카테고리","상품 선택","온라인 검색결과","플랫폼 가격 비교"].map((s, i) => (
+        {["카테고리","?�품 ?�택","?�라??검?�결�?,"?�랫??가�?비교"].map((s, i) => (
           <span key={i} style={S.stepWrap}>
             <span style={{ ...S.stepNum, ...(i===0||(i===1&&costcoProd)||(i===2&&searchData)||(i===3&&selItem)?S.stepDone:S.stepTodo)}}>{i+1}</span>
             <span style={{ ...S.stepLbl, ...(i===0||(i===1&&costcoProd)||(i===2&&searchData)||(i===3&&selItem)?S.stepLblDone:S.stepLblTodo)}}>{s}</span>
-            {i < 3 && <span style={S.stepSep}>›</span>}
+            {i < 3 && <span style={S.stepSep}>??/span>}
           </span>
         ))}
       </div>
 
-      {/* 3단 레이아웃 */}
+      {/* 3???�이?�웃 */}
       <div style={S.body}>
 
-        {/* 1열 */}
+        {/* 1??*/}
         <div style={S.col}>
-          <div style={S.colHead}>코스트코 · {products.length}개</div>
-          {loading && <div style={S.emptySmall}>불러오는 중...</div>}
-          {!loading && products.length === 0 && <div style={S.emptySmall}>상품 없음<br/>관리자 페이지에서 등록해주세요</div>}
+          <div style={S.colHead}>코스?�코 · {products.length}�?/div>
+          {loading && <div style={S.emptySmall}>불러?�는 �?..</div>}
+          {!loading && products.length === 0 && <div style={S.emptySmall}>?�품 ?�음<br/>관리자 ?�이지?�서 ?�록?�주?�요</div>}
           {products.map(p => {
             const up = p.unit_price || (p.unit_qty ? Math.round(p.costco_price / p.unit_qty * 100) : null)
             return (
@@ -110,23 +110,23 @@ export default function Home() {
                 <div style={S.prodInfo}>
                   <div style={S.prodName}>{p.name}</div>
                   <div style={S.prodMeta}>
-                    <span style={S.prodBadge}>코스트코</span>
-                    <span style={S.prodPrice}>₩{p.costco_price?.toLocaleString()}</span>
+                    <span style={S.prodBadge}>코스?�코</span>
+                    <span style={S.prodPrice}>??p.costco_price?.toLocaleString()}</span>
                     {p.unit && <span style={S.prodUnit}>{p.unit}</span>}
                   </div>
-                  {up && <div style={S.unitPrice}>₩{up.toLocaleString()}/{p.unit_base?.replace('당','') || '100g'}</div>}
+                  {up && <div style={S.unitPrice}>??up.toLocaleString()}/{p.unit_base?.replace('??,'') || '100g'}</div>}
                 </div>
-                <span style={{ color: costcoProd?.id === p.id ? '#2563EB' : '#D1D5DB', fontSize: 14 }}>{costcoProd?.id === p.id ? '▶' : '›'}</span>
+                <span style={{ color: costcoProd?.id === p.id ? '#2563EB' : '#D1D5DB', fontSize: 14 }}>{costcoProd?.id === p.id ? '?? : '??}</span>
               </div>
             )
           })}
         </div>
 
-        {/* 2열 */}
+        {/* 2??*/}
         <div style={S.col}>
-          <div style={S.colHead}>온라인 검색결과{costcoProd && <span style={S.colSub}> · {costcoProd.name}</span>}</div>
-          {!costcoProd && <div style={S.emptySmall}>← 상품을 선택하세요</div>}
-          {searchLoading && <div style={S.emptySmall}>🔄 검색 중...</div>}
+          <div style={S.colHead}>?�라??검?�결�?costcoProd && <span style={S.colSub}> · {costcoProd.name}</span>}</div>
+          {!costcoProd && <div style={S.emptySmall}>???�품???�택?�세??/div>}
+          {searchLoading && <div style={S.emptySmall}>?�� 검??�?..</div>}
           {!searchLoading && allSearchItems.length > 0 && ["naver","coupang","eleventh","gmarket"].map(pid => {
             const platItems = allSearchItems.filter(i => i.platformId === pid);
             if (!platItems.length) return null;
@@ -139,9 +139,9 @@ export default function Home() {
                     <div style={S.searchInfo}>
                       <div style={S.searchTitle}>{item.title}</div>
                       <div style={S.searchBottom}>
-                        <span style={S.searchPrice}>₩{item.price?.toLocaleString()}</span>
-                        {item.isFreeShip ? <span style={S.freeTag}>무료배송</span> : <span style={S.shipTag}>+₩{item.shippingFee?.toLocaleString()}</span>}
-                        {item.isRocket && <span style={S.rocketTag}>🚀 로켓</span>}
+                        <span style={S.searchPrice}>??item.price?.toLocaleString()}</span>
+                        {item.isFreeShip ? <span style={S.freeTag}>무료배송</span> : <span style={S.shipTag}>+??item.shippingFee?.toLocaleString()}</span>}
+                        {item.isRocket && <span style={S.rocketTag}>?? 로켓</span>}
                       </div>
                     </div>
                   </div>
@@ -151,13 +151,13 @@ export default function Home() {
           })}
         </div>
 
-        {/* 3열 */}
+        {/* 3??*/}
         <div style={S.col3}>
-          {!selItem && <div style={S.empty}><div style={{ fontSize:32, marginBottom:8 }}>←</div><div style={{ fontSize:13, color:'#9CA3AF' }}>검색결과에서 상품을 선택하세요</div></div>}
+          {!selItem && <div style={S.empty}><div style={{ fontSize:32, marginBottom:8 }}>??/div><div style={{ fontSize:13, color:'#9CA3AF' }}>검?�결과에???�품???�택?�세??/div></div>}
 
           {selItem && compareData && (
             <div>
-              {/* 선택된 상품 헤더 */}
+              {/* ?�택???�품 ?�더 */}
               <div style={S.selBox}>
                 {selItem.image && <img src={selItem.image} alt="" style={S.selImg} onError={e => e.target.style.display="none"} />}
                 <div style={S.selInfo}>
@@ -166,72 +166,72 @@ export default function Home() {
                     <span style={{ ...S.selSrc, color: PLATFORM_INFO[selItem.platformId]?.color }}>
                       {PLATFORM_INFO[selItem.platformId]?.label}
                     </span>
-                    <span style={S.selPrice}>₩{selItem.price?.toLocaleString()}</span>
-                    {costcoProd && <span style={S.selCostco}>코스트코 ₩{costcoProd.costco_price?.toLocaleString()}</span>}
+                    <span style={S.selPrice}>??selItem.price?.toLocaleString()}</span>
+                    {costcoProd && <span style={S.selCostco}>코스?�코 ??costcoProd.costco_price?.toLocaleString()}</span>}
                   </div>
                 </div>
               </div>
 
-              {/* 최저가 배너 */}
+              {/* 최�?가 배너 */}
               {compareData.winner && (
                 <div style={S.winnerBox}>
                   <div style={S.winnerLeft}>
-                    <span style={S.winnerBadge}>🏆 최저가</span>
+                    <span style={S.winnerBadge}>?�� 최�?가</span>
                     <span style={S.winnerName}>{compareData.winner.name}</span>
-                    <span style={S.winnerPrice}>₩{compareData.winner.price?.toLocaleString()}</span>
+                    <span style={S.winnerPrice}>??compareData.winner.price?.toLocaleString()}</span>
                   </div>
                   <div style={S.winnerRight}>
-                    {compareData.winner.saving > 0 && <span style={S.chipGreen}>타 플랫폼보다 ₩{compareData.winner.saving?.toLocaleString()} 저렴</span>}
-                    {costcoProd && compareData.winner.price < costcoProd.costco_price && <span style={S.chipGreen}>코스트코보다 ₩{(costcoProd.costco_price - compareData.winner.price)?.toLocaleString()} 저렴 🎉</span>}
-                    {costcoProd && compareData.winner.price >= costcoProd.costco_price && <span style={S.chipGray}>코스트코가 더 저렴</span>}
+                    {compareData.winner.saving > 0 && <span style={S.chipGreen}>?� ?�랫?�보????compareData.winner.saving?.toLocaleString()} ?�??/span>}
+                    {costcoProd && compareData.winner.price < costcoProd.costco_price && <span style={S.chipGreen}>코스?�코보다 ??(costcoProd.costco_price - compareData.winner.price)?.toLocaleString()} ?�???��</span>}
+                    {costcoProd && compareData.winner.price >= costcoProd.costco_price && <span style={S.chipGray}>코스?�코가 ???�??/span>}
                   </div>
                 </div>
               )}
 
-              {/* 비교 테이블 */}
+              {/* 비교 ?�이�?*/}
               <div style={S.table}>
                 <div style={S.tableHead}>
-                  <div style={S.th}>플랫폼</div>
-                  <div style={{ ...S.th, textAlign:'right' }}>상품가</div>
-                  <div style={{ ...S.th, textAlign:'right' }}>배송비</div>
-                  <div style={{ ...S.th, textAlign:'right' }}>총 결제액</div>
+                  <div style={S.th}>?�랫??/div>
+                  <div style={{ ...S.th, textAlign:'right' }}>?�품가</div>
+                  <div style={{ ...S.th, textAlign:'right' }}>배송�?/div>
+                  <div style={{ ...S.th, textAlign:'right' }}>�?결제??/div>
                 </div>
                 {["naver","coupang","eleventh","gmarket"].map(pid => {
                   const platData = compareData[pid];
                   const isBest   = compareData.winner?.platform === pid;
-                  const item     = platData?.items?.[0];
+                  const item = platData?.items?.length ? platData.items.reduce((a, b) => (a.total <= b.total ? a : b)) : null;
                   return (
                     <div key={pid} style={{ ...S.tableRow, ...(isBest ? S.tableRowBest : {}) }}>
                       <div style={{ ...S.td, display:'flex', alignItems:'center', gap:5 }}>
                         <span style={{ fontSize:12, fontWeight:500, color: isBest ? '#059669' : '#374151' }}>{PLATFORM_INFO[pid].label}</span>
-                        {isBest && <span style={S.bestBadge}>최저가</span>}
-                        {(!platData?.items?.length) && <span style={S.errBadge}>미연결</span>}
+                        {isBest && <span style={S.bestBadge}>최�?가</span>}
+                        {(!platData?.items?.length) && <span style={S.errBadge}>미연�?/span>}
                       </div>
-                      <div style={{ ...S.td, textAlign:'right', color: isBest ? '#059669' : '#111827', fontWeight: isBest ? 600 : 400 }}>{item ? `₩${item.price?.toLocaleString()}` : '—'}</div>
-                      <div style={{ ...S.td, textAlign:'right', color: item?.isFreeShip ? '#059669' : '#6B7280' }}>{item ? (item.isFreeShip ? '무료' + (item.isRocket?' 🚀':'') : `₩${item.shippingFee?.toLocaleString()}`) : '—'}</div>
-                      <div style={{ ...S.td, textAlign:'right', fontSize:14, fontWeight: isBest ? 700 : 500, color: isBest ? '#059669' : '#111827' }}>{item ? `₩${item.total?.toLocaleString()}` : '—'}</div>
+                      <div style={{ ...S.td, textAlign:'right', color: isBest ? '#059669' : '#111827', fontWeight: isBest ? 600 : 400 }}>{item ? `??{item.price?.toLocaleString()}` : '??}</div>
+                      <div style={{ ...S.td, textAlign:'right', color: item?.isFreeShip ? '#059669' : '#6B7280' }}>{item ? (item.isFreeShip ? '무료' + (item.isRocket?' ??':'') : `??{item.shippingFee?.toLocaleString()}`) : '??}</div>
+                      <div style={{ ...S.td, textAlign:'right', fontSize:14, fontWeight: isBest ? 700 : 500, color: isBest ? '#059669' : '#111827' }}>{item ? `??{item.total?.toLocaleString()}` : '??}</div>
                     </div>
                   );
                 })}
                 {costcoProd && (
                   <div style={{ ...S.tableRow, background:'#F9FAFB' }}>
-                    <div style={S.td}><span style={{ fontSize:12, color:'#9CA3AF' }}>🏬 코스트코 (기준)</span></div>
-                    <div style={{ ...S.td, textAlign:'right', color:'#9CA3AF', fontSize:12 }}>₩{costcoProd.costco_price?.toLocaleString()}</div>
+                    <div style={S.td}><span style={{ fontSize:12, color:'#9CA3AF' }}>?�� 코스?�코 (기�?)</span></div>
+                    <div style={{ ...S.td, textAlign:'right', color:'#9CA3AF', fontSize:12 }}>??costcoProd.costco_price?.toLocaleString()}</div>
                     <div style={{ ...S.td, textAlign:'right', color:'#9CA3AF', fontSize:12 }}>직접구매</div>
-                    <div style={{ ...S.td, textAlign:'right', color:'#9CA3AF', fontSize:12 }}>₩{costcoProd.costco_price?.toLocaleString()}</div>
+                    <div style={{ ...S.td, textAlign:'right', color:'#9CA3AF', fontSize:12 }}>??costcoProd.costco_price?.toLocaleString()}</div>
                   </div>
                 )}
               </div>
 
-              <div style={S.note}>* 배송비는 판매자 조건에 따라 달라질 수 있습니다</div>
+              <div style={S.note}>* 배송비는 ?�매??조건???�라 ?�라�????�습?�다</div>
 
-              {/* 저장 버튼 */}
+              {/* ?�??버튼 */}
               <div style={{ padding:'12px 16px', borderTop:'1px solid #F3F4F6', display:'flex', justifyContent:'flex-end' }}>
                 <button onClick={handleSave} disabled={saveStatus==="saving"} style={{
                   background: saveStatus==="done" ? '#059669' : saveStatus==="err" ? '#DC2626' : '#111827',
                   color:'#fff', border:'none', borderRadius:8, padding:'9px 20px', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'inherit',
                 }}>
-                  {saveStatus==="saving"?"저장 중...":saveStatus==="done"?"✓ 저장됨":saveStatus==="err"?"저장 실패":"💾 비교결과 저장"}
+                  {saveStatus==="saving"?"?�??�?..":saveStatus==="done"?"???�?�됨":saveStatus==="err"?"?�???�패":"?�� 비교결과 ?�??}
                 </button>
               </div>
             </div>
