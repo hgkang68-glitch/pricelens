@@ -2,9 +2,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Nav from '../components/Nav'
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null
+function getSupabaseClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) throw new Error('Supabase 환경변수가 설정되지 않았습니다')
+  return createClient(url, key)
+}
 
 
 
@@ -95,13 +98,13 @@ export default function Admin() {
   async function handlePhotoUpload(e, idx) {
     const file = e.target.files?.[0]
     if (!file) return
-    
     try {
+      const sb = getSupabaseClient()
       const ext  = file.name.split('.').pop()
       const path = `products/${editId || 'new_' + Date.now()}/photo_${idx}.${ext}`
-      const { error: upErr } = await supabase.storage.from('product-images').upload(path, file, { upsert: true })
+      const { error: upErr } = await sb.storage.from('product-images').upload(path, file, { upsert: true })
       if (upErr) throw upErr
-      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(path)
+      const { data: { publicUrl } } = sb.storage.from('product-images').getPublicUrl(path)
       const newPhotos = [...(form.photos || [])]
       newPhotos[idx] = publicUrl
       setForm(p => ({ ...p, photos: newPhotos }))
