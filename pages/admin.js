@@ -2,13 +2,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Nav from '../components/Nav'
-let supabase
-if (typeof window !== 'undefined') {
-  supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  )
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null
 
 
 
@@ -17,6 +13,8 @@ const SOURCES    = ['코스트코','올리브영','다이소','기타']
 const CATEGORIES = ['식품','생활용품','건강기능식품','전자제품','유아용품','기타']
 const UNIT_BASES = ['100g당','100ml당','1개당','1롤당','1캡슐당','1정당','1포당']
 const EMOJIS     = ['📦','🥜','🫒','🍫','🥚','🧻','🧴','🫧','🐟','🍊','⚡','🌿','🛒','🥩','🥦','💊','🌸','💄','🪥','🧽','🧺','🍼','🧷','🔋','💡','📱','🎁','🌟','🍕','🥗']
+const sourceBadgeColor = { '코스트코':'#2563EB','올리브영':'#EC4899','다이소':'#059669','기타':'#9CA3AF' }
+
 const STATUS_OPTS = [
   { val:'draft',   label:'초안',    color:'#9CA3AF' },
   { val:'active',  label:'판매중',  color:'#059669' },
@@ -198,7 +196,6 @@ export default function Admin() {
   function resetForm() { setForm(EMPTY); setEditId(null); setActiveTab('basic') }
 
   const filtered = filter === '전체' ? products : products.filter(p => p.category === filter)
-  const sourceBadgeColor = { '코스트코':'#2563EB','올리브영':'#EC4899','다이소':'#059669','기타':'#9CA3AF' }
 
   return (
     <div style={S.page}>
