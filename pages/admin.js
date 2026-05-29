@@ -60,7 +60,13 @@ export default function Admin() {
   const [rateUpdated,   setRateUpdated]   = useState(null)
   const [featureInput,  setFeatureInput]  = useState('')
   const [activeTab,     setActiveTab]     = useState('basic') // basic | content | pricing
-  const fileRefs = Array.from({ length: 6 }, () => useRef(null))
+  const fileRef0 = useRef(null)
+  const fileRef1 = useRef(null)
+  const fileRef2 = useRef(null)
+  const fileRef3 = useRef(null)
+  const fileRef4 = useRef(null)
+  const fileRef5 = useRef(null)
+  const fileRefs = [fileRef0, fileRef1, fileRef2, fileRef3, fileRef4, fileRef5]
 
   useEffect(() => { loadProducts(); fetchRates() }, [])
 
