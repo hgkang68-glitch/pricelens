@@ -2,12 +2,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import Nav from '../components/Nav'
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  )
-}
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
+
+
 
 
 
@@ -89,7 +89,7 @@ export default function Admin() {
   async function handlePhotoUpload(e, idx) {
     const file = e.target.files?.[0]
     if (!file) return
-    const supabase = getSupabase()
+    
     try {
       const ext  = file.name.split('.').pop()
       const path = `products/${editId || 'new_' + Date.now()}/photo_${idx}.${ext}`
