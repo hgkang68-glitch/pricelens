@@ -134,6 +134,15 @@ export default function Home() {
                     {p.unit && <span style={S.prodUnit}>{p.unit}</span>}
                   </div>
                   {up && <div style={S.unitPrice}>₩{up.toLocaleString()}/{p.unit_base?.replace('당','') || '100g'}</div>}
+                  {/* 방안C 통화 태그 */}
+                  {(p.sell_price_usd || p.sell_price_eur) && (
+                    <div style={S.curTagRow}>
+                      {p.sell_price_krw && <span style={S.curTagMain}>🇰🇷 ₩{Number(p.sell_price_krw).toLocaleString()}</span>}
+                      {p.sell_price_usd && <span style={S.curTagSub}>🇺🇸 ${Number(p.sell_price_usd).toFixed(2)}</span>}
+                      {p.sell_price_eur && <span style={S.curTagSub}>🇪🇺 €{Number(p.sell_price_eur).toFixed(2)}</span>}
+                      {p.sell_price_jpy && <span style={S.curTagSub}>🇯🇵 ¥{Number(p.sell_price_jpy).toLocaleString()}</span>}
+                    </div>
+                  )}
                 </div>
                 <span style={{ color: costcoProd?.id === p.id ? '#2563EB' : '#D1D5DB', fontSize: 14 }}>{costcoProd?.id === p.id ? '▶' : '›'}</span>
               </div>
@@ -295,6 +304,9 @@ const S = {
   prodPrice:   { fontSize:12, fontWeight:500, color:'#111827' },
   prodUnit:    { fontSize:10, color:'#9CA3AF' },
   unitPrice:   { fontSize:10, color:'#854D0E', background:'#FEF9C3', display:'inline-block', padding:'1px 6px', borderRadius:4, marginTop:3 },
+  curTagRow:   { display:'flex', gap:4, flexWrap:'wrap', marginTop:4 },
+  curTagMain:  { background:'#059669', color:'#fff', borderRadius:12, padding:'2px 8px', fontSize:10, fontWeight:600 },
+  curTagSub:   { background:'#F3F4F6', color:'#374151', border:'1px solid #E5E7EB', borderRadius:12, padding:'2px 7px', fontSize:10, fontWeight:500 },
   searchItem:  { display:'flex', gap:8, alignItems:'center', padding:'8px 12px', borderBottom:'1px solid #F3F4F6', cursor:'pointer' },
   searchItemOn:{ background:'#EFF6FF', borderLeft:'2px solid #2563EB' },
   searchImg:   { width:40, height:40, borderRadius:6, objectFit:'cover', flexShrink:0, background:'#F3F4F6' },
