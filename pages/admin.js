@@ -1,14 +1,15 @@
 // 📄 pages/admin.js — 소싱처 + 사진업로드 + 환율가격 + 방안C 통화태그
 import { useState, useEffect, useRef } from 'react'
+import { createClient } from '@supabase/supabase-js'
 import Nav from '../components/Nav'
-
 function getSupabase() {
-  const { createClient } = require('@supabase/supabase-js')
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
   )
 }
+
+
 
 const SOURCES    = ['코스트코','올리브영','다이소','기타']
 const CATEGORIES = ['식품','생활용품','건강기능식품','전자제품','유아용품','기타']
