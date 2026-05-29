@@ -1,7 +1,14 @@
 // 📄 pages/admin.js — 소싱처 + 사진업로드 + 환율가격 + 방안C 통화태그
 import { useState, useEffect, useRef } from 'react'
-import { createClient } from '@supabase/supabase-js'
 import Nav from '../components/Nav'
+
+function getSupabase() {
+  const { createClient } = require('@supabase/supabase-js')
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  )
+}
 
 const SOURCES    = ['코스트코','올리브영','다이소','기타']
 const CATEGORIES = ['식품','생활용품','건강기능식품','전자제품','유아용품','기타']
@@ -52,11 +59,6 @@ export default function Admin() {
   const [activeTab,     setActiveTab]     = useState('basic') // basic | content | pricing
   const fileRefs = Array.from({ length: 6 }, () => useRef(null))
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  )
-
   useEffect(() => { loadProducts(); fetchRates() }, [])
 
   async function fetchRates() {
@@ -86,6 +88,7 @@ export default function Admin() {
   async function handlePhotoUpload(e, idx) {
     const file = e.target.files?.[0]
     if (!file) return
+    const supabase = getSupabase()
     try {
       const ext  = file.name.split('.').pop()
       const path = `products/${editId || 'new_' + Date.now()}/photo_${idx}.${ext}`
