@@ -221,17 +221,20 @@ export default function Admin() {
         </div>
 
         <div style={S.layout}>
-          {/* ── 왼쪽 폼 ── */}
-          <div style={S.leftCol}>
-
-            {/* 네이버 자동 수집 */}
+          {/* ── 상단: 네이버 자동 수집 (전체폭) ── */}
+          <div style={S.topSection}>
             <div style={S.section}>
               <div style={S.sectionTitle}>🔍 네이버 자동 수집</div>
               <div style={S.importRow}>
                 <input style={S.input} value={importQuery} onChange={e=>setImportQuery(e.target.value)}
                   onKeyDown={e=>e.key==='Enter'&&handleImportSearch()} placeholder="검색어 입력 (예: 올리브영 마스크팩)" />
                 <button style={S.searchBtn} onClick={handleImportSearch} disabled={importLoading}>{importLoading?'검색중...':'검색'}</button>
-                <button style={S.outlineBtn} onClick={()=>window.open(`https://www.costco.co.kr/search?q=${encodeURIComponent(importQuery)}`,'_blank')}>코스트코몰 ↗</button>
+              </div>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:10}}>
+                <button style={S.shopBtn} onClick={()=>window.open(`https://www.costco.co.kr/search?q=${encodeURIComponent(importQuery)}`,'_blank')}>코스트코 ↗</button>
+                <button style={{...S.shopBtn,color:'#EC4899',borderColor:'#EC4899'}} onClick={()=>window.open(`https://www.oliveyoung.co.kr/store/search/getSearchMain.do?query=${encodeURIComponent(importQuery)}`,'_blank')}>올리브영 ↗</button>
+                <button style={{...S.shopBtn,color:'#059669',borderColor:'#059669'}} onClick={()=>window.open(`https://www.daiso.co.kr/search/search.do?keyword=${encodeURIComponent(importQuery)}`,'_blank')}>다이소 ↗</button>
+                <button style={{...S.shopBtn,color:'#EF4444',borderColor:'#EF4444'}} onClick={()=>window.open(`https://www.coupang.com/np/search?q=${encodeURIComponent(importQuery)}`,'_blank')}>쿠팡 ↗</button>
               </div>
               {importItems.length > 0 && (
                 <div style={S.importList}>
@@ -252,8 +255,12 @@ export default function Admin() {
                 </div>
               )}
             </div>
+          </div>
 
-            {/* 탭 메뉴 */}
+          {/* ── 하단: 등록폼(왼) + 상품목록(오) ── */}
+          <div style={S.bottomLayout}>
+          {/* ── 등록폼 ── */}
+          <div style={S.leftCol}>
             <div style={S.section}>
               <div style={S.tabRow}>
                 {[['basic','기본정보'],['pricing','가격/환율'],['content','콘텐츠']].map(([k,l])=>(
@@ -425,7 +432,7 @@ export default function Admin() {
                             <div key={idx} style={S.photoSlot}>
                               {url ? (
                                 <div style={{position:'relative',width:'100%',height:'100%'}}>
-                                  <img src={url} alt="" style={{width:'100%',height:'100%',objectFit:'cover',borderRadius:6}} />
+                                  <img src={url} alt="" style={{width:'100%',height:'100%',objectFit:'contain',borderRadius:6,background:'#F9FAFB'}} />
                                   <button type="button" style={S.photoRemove} onClick={()=>removePhoto(idx)}>✕</button>
                                 </div>
                               ) : (
@@ -533,6 +540,7 @@ export default function Admin() {
             })}
             {filtered.length === 0 && <div style={S.empty}>등록된 상품이 없습니다</div>}
           </div>
+          </div>{/* bottomLayout */}
         </div>
       </div>
     </div>
@@ -541,7 +549,7 @@ export default function Admin() {
 
 const S = {
   page:      { minHeight:'100vh', background:'#F9FAFB', color:'#111827', fontFamily:"system-ui,-apple-system,'Noto Sans KR',sans-serif" },
-  container: { maxWidth:1300, margin:'0 auto', padding:'24px 20px' },
+  container: { maxWidth:1400, margin:'0 auto', padding:'24px 20px' },
   topbar:    { display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20, flexWrap:'wrap', gap:10 },
   h1:        { fontSize:22, fontWeight:600, color:'#111827' },
   toast:     { position:'fixed', bottom:20, left:'50%', transform:'translateX(-50%)', color:'#fff', padding:'10px 24px', borderRadius:20, fontSize:13, fontWeight:600, zIndex:999, whiteSpace:'nowrap' },
@@ -549,12 +557,15 @@ const S = {
   rateLabel: { fontSize:11, color:'#9CA3AF', fontWeight:500 },
   rateChip:  { fontSize:12, background:'#F3F4F6', color:'#374151', padding:'4px 10px', borderRadius:20 },
   rateRefresh:{ background:'none', border:'none', cursor:'pointer', fontSize:14, color:'#6B7280', padding:'4px' },
-  layout:    { display:'grid', gridTemplateColumns:'500px 1fr', gap:20, alignItems:'start' },
+  layout:    { display:'flex', flexDirection:'column', gap:16 },
+  topSection:{ width:'100%' },
+  bottomLayout:{ display:'grid', gridTemplateColumns:'480px 1fr', gap:20, alignItems:'start' },
   leftCol:   { display:'flex', flexDirection:'column', gap:16 },
-  rightCol:  { background:'#fff', border:'1px solid #E5E7EB', borderRadius:12, padding:20 },
+  rightCol:  { background:'#fff', border:'1px solid #E5E7EB', borderRadius:12, padding:20, maxHeight:'80vh', overflowY:'auto' },
   section:   { background:'#fff', border:'1px solid #E5E7EB', borderRadius:12, padding:20 },
   sectionTitle:{ fontSize:14, fontWeight:600, color:'#111827', marginBottom:14, paddingBottom:12, borderBottom:'1px solid #F3F4F6' },
-  importRow: { display:'flex', gap:8, marginBottom:10 },
+  importRow: { display:'flex', gap:8, marginBottom:8 },
+  shopBtn:   { background:'#fff', border:'1px solid #E5E7EB', color:'#374151', borderRadius:7, padding:'6px 12px', fontSize:12, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit', fontWeight:500 },
   searchBtn: { background:'#2563EB', color:'#fff', border:'none', borderRadius:7, padding:'8px 14px', fontSize:13, fontWeight:500, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit' },
   outlineBtn:{ background:'#F9FAFB', color:'#374151', border:'1px solid #E5E7EB', borderRadius:7, padding:'8px 10px', fontSize:12, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit' },
   importList:{ maxHeight:280, overflowY:'auto', display:'flex', flexDirection:'column', gap:6 },
