@@ -12,11 +12,32 @@ function getSupabaseClient() {
 
 
 
-const SOURCES    = ['코스트코','올리브영','다이소','기타']
+const SOURCES    = ['코스트코','올리브영','다이소','쿠팡','기타']
 const CATEGORIES = ['식품','생활용품','건강기능식품','전자제품','유아용품','기타']
 const UNIT_BASES = ['100g당','100ml당','1개당','1롤당','1캡슐당','1정당','1포당']
 const EMOJIS     = ['📦','🥜','🫒','🍫','🥚','🧻','🧴','🫧','🐟','🍊','⚡','🌿','🛒','🥩','🥦','💊','🌸','💄','🪥','🧽','🧺','🍼','🧷','🔋','💡','📱','🎁','🌟','🍕','🥗']
-const sourceBadgeColor = { '코스트코':'#2563EB','올리브영':'#EC4899','다이소':'#059669','기타':'#9CA3AF' }
+const sourceBadgeColor = { '코스트코':'#2563EB','올리브영':'#EC4899','다이소':'#059669','쿠팡':'#EF4444','기타':'#9CA3AF' }
+
+const PLATFORMS = [
+  { id:'ebay',     label:'eBay',     flag:'🌐', fee:13, color:'#E53E3E' },
+  { id:'shopify',  label:'Shopify',  flag:'🛍️', fee:2,  color:'#38A169' },
+  { id:'amazon',   label:'Amazon',   flag:'📦', fee:15, color:'#D69E2E' },
+  { id:'rakuten',  label:'Rakuten',  flag:'🇯🇵', fee:8,  color:'#E53E3E' },
+]
+
+function calcPlatformPrice(buyPrice, marginRate, fxSafety, platformFee, rates) {
+  if (!buyPrice || !rates) return null
+  const cost    = Number(buyPrice)
+  const sellKRW = cost / (1 - marginRate/100) / (1 - platformFee/100)
+  const safe    = (r) => r * (1 - fxSafety/100)
+  return {
+    krw: Math.round(sellKRW),
+    usd: Math.round(sellKRW / safe(rates.USD) * 100) / 100,
+    eur: Math.round(sellKRW / safe(rates.EUR) * 100) / 100,
+    jpy: Math.round(sellKRW / safe(rates.JPY)),
+    margin: Math.round((sellKRW - cost) / sellKRW * 100),
+  }
+}
 
 const STATUS_OPTS = [
   { val:'draft',   label:'초안',    color:'#9CA3AF' },
@@ -30,8 +51,9 @@ const EMPTY = {
   search_query:'', notes:'',
   margin_rate: 35, fx_safety: 5, platform_fee: 13,
   sell_price_krw: null, sell_price_usd: null, sell_price_eur: null, sell_price_jpy: null,
-  photos: [], description_ko:'', description_en:'',
+  photos: [], description_ko:'', description_en:'', title_en:'',
   features: [], weight_g:'', ship_info:'', listing_status:'draft',
+  target_platforms: [], ebay_category:'', ebay_price_usd:'', shopify_price_usd:'', amazon_price_usd:'',
 }
 
 function calcPrices(buyPrice, marginRate, fxSafety, platformFee, rates) {
@@ -189,8 +211,11 @@ export default function Admin() {
       sell_price_krw: p.sell_price_krw, sell_price_usd: p.sell_price_usd,
       sell_price_eur: p.sell_price_eur, sell_price_jpy: p.sell_price_jpy,
       photos: p.photos||[], description_ko: p.description_ko||'', description_en: p.description_en||'',
+      title_en: p.title_en||'',
       features: p.features||[], weight_g: p.weight_g||'', ship_info: p.ship_info||'',
       listing_status: p.listing_status||'draft',
+      target_platforms: p.target_platforms||[], ebay_category: p.ebay_category||'',
+      ebay_price_usd: p.ebay_price_usd||'', shopify_price_usd: p.shopify_price_usd||'', amazon_price_usd: p.amazon_price_usd||'',
     })
     setActiveTab('basic')
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -259,7 +284,7 @@ export default function Admin() {
           {/* 등록 폼 */}
           <div style={S.section}>
             <div style={S.tabRow}>
-              {[['basic','기본정보'],['pricing','가격/환율'],['content','콘텐츠']].map(([k,l])=>(
+              {[['basic','기본정보'],['pricing','가격/환율'],['content','콘텐츠'],['global','해외판매']].map(([k,l])=>(
                 <button key={k} style={{...S.tab,...(activeTab===k?S.tabOn:{})}} onClick={()=>setActiveTab(k)}>{l}</button>
               ))}
             </div>
@@ -480,6 +505,86 @@ export default function Admin() {
                   </div>
                 )}
 
+                {/* ─ 탭4: 해외판매 ─ */}
+                {activeTab === 'global' && (
+                  <div>
+                    {/* 판매 플랫폼 선택 */}
+                    <div style={S.field}>
+                      <label style={S.label}>판매 플랫폼 선택</label>
+                      <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}}>
+                        {PLATFORMS.map(pl=>{
+                          const on = (form.target_platforms||[]).includes(pl.id)
+                          return (
+                            <button key={pl.id} type="button"
+                              style={{...S.platformBtn, ...(on?{background:pl.color,color:'#fff',borderColor:pl.color}:{})}}
+                              onClick={()=>{
+                                const cur = form.target_platforms||[]
+                                setForm(p=>({...p, target_platforms: on ? cur.filter(x=>x!==pl.id) : [...cur,pl.id],
+                                  platform_fee: on ? 13 : pl.fee
+                                }))
+                              }}>
+                              {pl.flag} {pl.label} ({pl.fee}%)
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* 영문 상품명 */}
+                    <div style={S.field}>
+                      <label style={S.label}>영문 상품명 <span style={{color:'#9CA3AF',fontWeight:400}}>eBay/Amazon/Shopify 등록용</span></label>
+                      <input style={S.input} value={form.title_en||''} onChange={e=>setForm(p=>({...p,title_en:e.target.value}))} placeholder="예: Kirkland Signature Vitamin C 500mg 500 Tablets" />
+                    </div>
+
+                    {/* eBay 카테고리 */}
+                    <div style={S.field}>
+                      <label style={S.label}>eBay 카테고리 ID <span style={{color:'#9CA3AF',fontWeight:400}}>나중에 API 연동 시 사용</span></label>
+                      <input style={S.input} value={form.ebay_category||''} onChange={e=>setForm(p=>({...p,ebay_category:e.target.value}))} placeholder="예: 180959 (Vitamins & Minerals)" />
+                    </div>
+
+                    {/* 플랫폼별 목표 판매가 */}
+                    <div style={S.field}>
+                      <label style={S.label}>플랫폼별 목표 판매가 (USD)</label>
+                      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+                        {[
+                          {id:'ebay', label:'eBay', key:'ebay_price_usd'},
+                          {id:'shopify', label:'Shopify', key:'shopify_price_usd'},
+                          {id:'amazon', label:'Amazon', key:'amazon_price_usd'},
+                        ].map(pl=>(
+                          <div key={pl.id}>
+                            <label style={{...S.label,color:'#6B7280'}}>{pl.label} $</label>
+                            <input style={S.input} type="number" step="0.01" value={form[pl.key]||''} onChange={e=>setForm(p=>({...p,[pl.key]:e.target.value}))} placeholder="0.00" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 플랫폼별 마진 비교표 */}
+                    {form.costco_price && rates && (
+                      <div style={S.marginTable}>
+                        <div style={{fontSize:12,fontWeight:600,color:'#111827',marginBottom:10}}>📊 플랫폼별 마진 비교</div>
+                        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:1,background:'#E5E7EB',borderRadius:8,overflow:'hidden'}}>
+                          {['플랫폼','수수료','권장가(USD)','예상마진'].map(h=>(
+                            <div key={h} style={{background:'#F3F4F6',padding:'7px 8px',fontSize:11,fontWeight:600,color:'#6B7280',textAlign:'center'}}>{h}</div>
+                          ))}
+                          {PLATFORMS.map(pl=>{
+                            const p = calcPlatformPrice(form.costco_price, form.margin_rate, form.fx_safety, pl.fee, rates)
+                            return p ? [
+                              <div key={pl.id+'n'} style={{background:'#fff',padding:'8px',fontSize:12,fontWeight:500,textAlign:'center'}}>{pl.flag} {pl.label}</div>,
+                              <div key={pl.id+'f'} style={{background:'#fff',padding:'8px',fontSize:12,textAlign:'center',color:'#6B7280'}}>{pl.fee}%</div>,
+                              <div key={pl.id+'p'} style={{background:'#fff',padding:'8px',fontSize:12,fontWeight:600,textAlign:'center',color:'#2563EB'}}>${p.usd}</div>,
+                              <div key={pl.id+'m'} style={{background:'#fff',padding:'8px',fontSize:12,fontWeight:600,textAlign:'center',color: p.margin>=20?'#059669':'#D97706'}}>{p.margin}%</div>,
+                            ] : null
+                          })}
+                        </div>
+                        <div style={{fontSize:11,color:'#9CA3AF',marginTop:6}}>
+                          소싱가 ₩{Number(form.costco_price).toLocaleString()} · 마진율 {form.margin_rate}% · 환율안전마진 {form.fx_safety}%
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div style={{display:'flex',gap:8,marginTop:16}}>
                   <button style={S.submitBtn} type="submit" disabled={loading}>{loading?'저장 중...':editId?'수정 저장':'등록하기'}</button>
                   {editId && <button style={S.cancelBtn} type="button" onClick={resetForm}>취소</button>}
@@ -516,6 +621,10 @@ export default function Admin() {
                       <span style={{...S.sourceTag,borderColor:sourceBadgeColor[p.source_type]||'#9CA3AF',color:sourceBadgeColor[p.source_type]||'#9CA3AF'}}>{p.source_type||'코스트코'}</span>
                       <span style={S.prodPrice}>₩{p.costco_price?.toLocaleString()}</span>
                       {p.unit && <span style={S.prodUnit}>{p.unit}</span>}
+                      {(p.target_platforms||[]).map(pid=>{
+                        const pl = PLATFORMS.find(x=>x.id===pid)
+                        return pl ? <span key={pid} style={{fontSize:10,background:'#F3F4F6',borderRadius:4,padding:'1px 5px',color:'#374151'}}>{pl.flag}{pl.label}</span> : null
+                      })}
                     </div>
                     {hasPrices && (
                       <div style={S.currencyTagRow2}>
@@ -523,6 +632,9 @@ export default function Admin() {
                         {p.sell_price_usd && <span style={S.curTag2}>🇺🇸 ${Number(p.sell_price_usd).toFixed(2)}</span>}
                         {p.sell_price_eur && <span style={S.curTag2}>🇪🇺 €{Number(p.sell_price_eur).toFixed(2)}</span>}
                         {p.sell_price_jpy && <span style={S.curTag2}>🇯🇵 ¥{Number(p.sell_price_jpy).toLocaleString()}</span>}
+                        {p.ebay_price_usd && <span style={{...S.curTag2,background:'#FEE2E2',color:'#DC2626'}}>eBay ${p.ebay_price_usd}</span>}
+                        {p.shopify_price_usd && <span style={{...S.curTag2,background:'#D1FAE5',color:'#059669'}}>Shopify ${p.shopify_price_usd}</span>}
+                        {p.amazon_price_usd && <span style={{...S.curTag2,background:'#FEF3C7',color:'#D97706'}}>Amazon ${p.amazon_price_usd}</span>}
                       </div>
                     )}
                   </div>
@@ -614,6 +726,8 @@ const S = {
   prodUnit:  { fontSize:11, color:'#9CA3AF' },
   currencyTagRow2:{ display:'flex', gap:4, flexWrap:'wrap', marginTop:3 },
   curTag2:   { background:'#F3F4F6', color:'#374151', borderRadius:12, padding:'2px 7px', fontSize:10, fontWeight:500 },
+  platformBtn:  { background:'#fff', border:'1px solid #E5E7EB', color:'#374151', borderRadius:8, padding:'8px 14px', fontSize:12, cursor:'pointer', fontFamily:'inherit', fontWeight:500, transition:'all 0.15s' },
+  marginTable:  { background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:10, padding:'14px', marginTop:4 },
   editBtn:   { background:'#fff', border:'1px solid #E5E7EB', color:'#374151', borderRadius:6, padding:'4px 10px', fontSize:11, cursor:'pointer', fontFamily:'inherit' },
   delBtn:    { background:'#fff', border:'1px solid #FEE2E2', color:'#DC2626', borderRadius:6, padding:'4px 10px', fontSize:11, cursor:'pointer', fontFamily:'inherit' },
   empty:     { color:'#9CA3AF', fontSize:13, textAlign:'center', padding:'40px 0' },
