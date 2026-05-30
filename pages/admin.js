@@ -82,7 +82,8 @@ export default function Admin() {
   const [rates,         setRates]         = useState(null)
   const [rateUpdated,   setRateUpdated]   = useState(null)
   const [featureInput,  setFeatureInput]  = useState('')
-  const [activeTab,     setActiveTab]     = useState('basic') // basic | content | pricing
+  const [activeTab,     setActiveTab]     = useState('basic') // basic | content | pricing | global
+  const [aiLoading,     setAiLoading]     = useState(false)
   const fileRef0 = useRef(null)
   const fileRef1 = useRef(null)
   const fileRef2 = useRef(null)
@@ -148,6 +149,55 @@ export default function Admin() {
   }
   function removeFeature(i) {
     setForm(p => ({ ...p, features: p.features.filter((_, idx) => idx !== i) }))
+  }
+
+  // AI 영작 자동 번역
+  async function handleAiTranslate() {
+    if (!form.name) { showMsg('상품명을 먼저 입력해주세요', 'err'); return }
+    setAiLoading(true)
+    try {
+      const prompt = `You are a product listing expert for international e-commerce (eBay, Amazon, Shopify).
+Translate and optimize the following Korean product info into English for global selling.
+
+Product Name (Korean): ${form.name}
+Category: ${form.category}
+Source: ${form.source_type}
+Description (Korean): ${form.description_ko || 'N/A'}
+Features: ${(form.features||[]).join(', ') || 'N/A'}
+Unit: ${form.unit || 'N/A'}
+
+Respond ONLY with a JSON object (no markdown, no explanation):
+{
+  "title_en": "optimized English product title (max 80 chars, eBay/Amazon style)",
+  "description_en": "English product description (3-5 sentences, highlight key features)",
+  "ebay_category": "suggested eBay category name and typical ID",
+  "features_en": ["feature1", "feature2", "feature3"]
+}`
+
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      })
+      const data = await res.json()
+      const text = data.content?.[0]?.text || ''
+      const clean = text.replace(/```json|```/g, '').trim()
+      const parsed = JSON.parse(clean)
+      setForm(p => ({
+        ...p,
+        title_en: parsed.title_en || p.title_en,
+        description_en: parsed.description_en || p.description_en,
+        ebay_category: parsed.ebay_category || p.ebay_category,
+      }))
+      showMsg('AI 영작 완료! ✨')
+    } catch (err) {
+      showMsg('AI 영작 실패: ' + err.message, 'err')
+    }
+    setAiLoading(false)
   }
 
   // 네이버 자동 수집
@@ -508,6 +558,17 @@ export default function Admin() {
                 {/* ─ 탭4: 해외판매 ─ */}
                 {activeTab === 'global' && (
                   <div>
+                    {/* AI 영작 버튼 */}
+                    <div style={{background:'#EFF6FF',border:'1px solid #BFDBFE',borderRadius:10,padding:'12px 14px',marginBottom:16,display:'flex',alignItems:'center',justifyContent:'space-between',gap:12}}>
+                      <div>
+                        <div style={{fontSize:13,fontWeight:600,color:'#1D4ED8',marginBottom:2}}>✨ AI 자동 영작</div>
+                        <div style={{fontSize:11,color:'#3B82F6'}}>한글 상품명/설명을 eBay·Amazon·Shopify용 영문으로 자동 변환</div>
+                      </div>
+                      <button type="button" style={{...S.aiBtn,...(aiLoading?{opacity:0.7}:{})}} onClick={handleAiTranslate} disabled={aiLoading}>
+                        {aiLoading ? '번역 중...' : '🤖 AI 영작 시작'}
+                      </button>
+                    </div>
+
                     {/* 판매 플랫폼 선택 */}
                     <div style={S.field}>
                       <label style={S.label}>판매 플랫폼 선택</label>
@@ -532,14 +593,26 @@ export default function Admin() {
 
                     {/* 영문 상품명 */}
                     <div style={S.field}>
-                      <label style={S.label}>영문 상품명 <span style={{color:'#9CA3AF',fontWeight:400}}>eBay/Amazon/Shopify 등록용</span></label>
-                      <input style={S.input} value={form.title_en||''} onChange={e=>setForm(p=>({...p,title_en:e.target.value}))} placeholder="예: Kirkland Signature Vitamin C 500mg 500 Tablets" />
+                      <label style={S.label}>
+                        영문 상품명 <span style={{color:'#9CA3AF',fontWeight:400}}>eBay/Amazon/Shopify 등록용</span>
+                        {form.title_en && <span style={{marginLeft:6,fontSize:10,background:'#D1FAE5',color:'#059669',padding:'1px 6px',borderRadius:10}}>AI 완료 ✓</span>}
+                      </label>
+                      <input style={{...S.input,...(form.title_en?{borderColor:'#A7F3D0'}:{})}} value={form.title_en||''} onChange={e=>setForm(p=>({...p,title_en:e.target.value}))} placeholder="AI 영작 버튼을 누르면 자동 입력됩니다" />
+                    </div>
+
+                    {/* 영문 설명 */}
+                    <div style={S.field}>
+                      <label style={S.label}>
+                        영문 상품 설명
+                        {form.description_en && <span style={{marginLeft:6,fontSize:10,background:'#D1FAE5',color:'#059669',padding:'1px 6px',borderRadius:10}}>AI 완료 ✓</span>}
+                      </label>
+                      <textarea style={{...S.input,resize:'vertical',...(form.description_en?{borderColor:'#A7F3D0'}:{})}} value={form.description_en||''} onChange={e=>setForm(p=>({...p,description_en:e.target.value}))} rows={4} placeholder="AI 영작 버튼을 누르면 자동 입력됩니다" />
                     </div>
 
                     {/* eBay 카테고리 */}
                     <div style={S.field}>
-                      <label style={S.label}>eBay 카테고리 ID <span style={{color:'#9CA3AF',fontWeight:400}}>나중에 API 연동 시 사용</span></label>
-                      <input style={S.input} value={form.ebay_category||''} onChange={e=>setForm(p=>({...p,ebay_category:e.target.value}))} placeholder="예: 180959 (Vitamins & Minerals)" />
+                      <label style={S.label}>eBay 카테고리 <span style={{color:'#9CA3AF',fontWeight:400}}>AI가 추천 / 나중에 API 연동 시 사용</span></label>
+                      <input style={{...S.input,...(form.ebay_category?{borderColor:'#A7F3D0'}:{})}} value={form.ebay_category||''} onChange={e=>setForm(p=>({...p,ebay_category:e.target.value}))} placeholder="AI 영작 후 자동 추천됩니다" />
                     </div>
 
                     {/* 플랫폼별 목표 판매가 */}
@@ -726,6 +799,7 @@ const S = {
   prodUnit:  { fontSize:11, color:'#9CA3AF' },
   currencyTagRow2:{ display:'flex', gap:4, flexWrap:'wrap', marginTop:3 },
   curTag2:   { background:'#F3F4F6', color:'#374151', borderRadius:12, padding:'2px 7px', fontSize:10, fontWeight:500 },
+  aiBtn:       { background:'#2563EB', color:'#fff', border:'none', borderRadius:8, padding:'10px 18px', fontSize:13, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'inherit' },
   platformBtn:  { background:'#fff', border:'1px solid #E5E7EB', color:'#374151', borderRadius:8, padding:'8px 14px', fontSize:12, cursor:'pointer', fontFamily:'inherit', fontWeight:500, transition:'all 0.15s' },
   marginTable:  { background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:10, padding:'14px', marginTop:4 },
   editBtn:   { background:'#fff', border:'1px solid #E5E7EB', color:'#374151', borderRadius:6, padding:'4px 10px', fontSize:11, cursor:'pointer', fontFamily:'inherit' },
