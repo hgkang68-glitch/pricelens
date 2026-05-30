@@ -233,7 +233,7 @@ export default function Admin() {
             <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:10}}>
               <button style={S.shopBtn} onClick={()=>window.open(`https://www.costco.co.kr/search?q=${encodeURIComponent(importQuery)}`,'_blank')}>코스트코 ↗</button>
               <button style={{...S.shopBtn,color:'#EC4899',borderColor:'#EC4899'}} onClick={()=>window.open(`https://www.oliveyoung.co.kr/store/search/getSearchMain.do?query=${encodeURIComponent(importQuery)}`,'_blank')}>올리브영 ↗</button>
-              <button style={{...S.shopBtn,color:'#059669',borderColor:'#059669'}} onClick={()=>window.open(`https://search.daisomall.co.kr/search?q=${encodeURIComponent(importQuery)}`,'_blank')}>다이소 ↗</button>
+              <button style={{...S.shopBtn,color:'#059669',borderColor:'#059669'}} onClick={()=>window.open(`https://www.daisomall.co.kr/ds/dst/SCR_DST_0015?searchTerm=${encodeURIComponent(importQuery)}`,'_blank')}>다이소 ↗</button>
               <button style={{...S.shopBtn,color:'#EF4444',borderColor:'#EF4444'}} onClick={()=>window.open(`https://www.coupang.com/np/search?q=${encodeURIComponent(importQuery)}`,'_blank')}>쿠팡 ↗</button>
             </div>
             {importItems.length > 0 && (
@@ -551,7 +551,7 @@ const S = {
   rateLabel:   { fontSize:11, color:'#9CA3AF', fontWeight:500 },
   rateChip:    { fontSize:12, background:'#F3F4F6', color:'#374151', padding:'4px 10px', borderRadius:20 },
   rateRefresh: { background:'none', border:'none', cursor:'pointer', fontSize:14, color:'#6B7280', padding:'4px' },
-  topLayout:   { display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, alignItems:'start' },
+  topLayout:   { display:'grid', gridTemplateColumns:'3fr 2fr', gap:16, alignItems:'start' },
   bottomSection:{ background:'#fff', border:'1px solid #E5E7EB', borderRadius:12, padding:20 },
   listGrid:    { display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(420px, 1fr))', gap:0 },
   leftCol:     { display:'flex', flexDirection:'column', gap:16 },
